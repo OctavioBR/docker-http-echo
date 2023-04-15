@@ -61,7 +61,7 @@ process.on('SIGINT', () => {
   console.log('Got SIGINT. Trying to exit gracefully.');
   calledClose = true;
   server.close(() => {
-    console.log("Exoress server closed. Asking process to exit.");
+    console.log("Express server closed. Asking process to exit.");
     process.exit();
   });
 });
