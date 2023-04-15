@@ -1,16 +1,17 @@
-var express = require('express')
-const morgan = require('morgan');
-var app = express()
 const os = require('os');
+const express = require('express');
+const morgan = require('morgan');
+const concat = require('concat-stream');
 const jwt = require('jsonwebtoken');
-var concat = require('concat-stream');
+
+let app = express();
 
 app.set('json spaces', 2);
 
 app.use(morgan('combined'));
 
-app.use(function(req, res, next){
-  req.pipe(concat(function(data){
+app.use((req, res, next) => {
+  req.pipe(concat(data => {
     req.body = data.toString('utf8');
     next();
   }));
@@ -40,7 +41,7 @@ app.all('*', (req, res) => {
     if (!token) {
       echo.jwt = token;
     } else {
-      const decoded = jwt.decode(token, {complete: true});
+      const decoded = jwt.decode(token, { complete: true });
       echo.jwt = decoded;
     }
   }
@@ -50,19 +51,17 @@ app.all('*', (req, res) => {
 const server = app.listen(process.env.PORT || 80);
 let calledClose = false;
 
-process.on('exit', function () {
+process.on('exit', () => {
   if (calledClose) return;
   console.log('Got exit event. Trying to stop Express server.');
-  server.close(function() {
-    console.log("Express server closed");
-  });
+  server.close(() => console.log("Express server closed"));
 });
 
-process.on('SIGINT', function() {
+process.on('SIGINT', () => {
   console.log('Got SIGINT. Trying to exit gracefully.');
   calledClose = true;
-  server.close(function() {
+  server.close(() => {
     console.log("Exoress server closed. Asking process to exit.");
-    process.exit()
+    process.exit();
   });
 });
