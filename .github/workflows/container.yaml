@@ -1,0 +1,53 @@
+name: Container
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+env:
+  SHORT_SHA: $(echo ${{ github.sha }} | cut -c 1-7)
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # if: github.ref == 'refs/heads/main'
+    steps:
+    - name: Clone
+      uses: actions/checkout@v3
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-region: eu-west-2
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Build and push image to ECR
+      id: build-image
+      env:
+        IMAGE: ${{ steps.login-ecr.outputs.registry }}/http-echo:${{ env.SHORT_SHA }}
+      run: |
+        docker image build . --tag ${{ env.IMAGE }}
+        docker push ${{ env.IMAGE }}
+
+    - name: Install and configure kubectl
+      run: |
+        curl --location --remote-name https://storage.googleapis.com/kubernetes-release/release/v1.26.2/bin/linux/amd64/kubectl
+        chmod +x kubectl
+        sudo mv kubectl /usr/local/bin/
+        aws eks update-kubeconfig --name green
+        kubectl --namespace=http-echo get deploy
+
+    # - name: Update deployment image
+    #   id: kubectl
+    #   uses: ianbelcher/eks-kubectl-action@master
+    #   env:
+    #     IMAGE: ${{ steps.login-ecr.outputs.registry }}/http-echo:${{ env.SHORT_SHA }}
+    #   with:
+    #     cluster_name: green
+    #     args: set image --record deployment/echo http-echo=faa1d34
+    # - name: Use the output
+    #   run: echo "${{ steps.kubectl.outputs.kubectl-out }}"

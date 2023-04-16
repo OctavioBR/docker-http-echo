@@ -20,7 +20,7 @@ jobs:
         shell: bash
         working-directory: ./terraform
     steps:
-    - name: Checkout repo to runner
+    - name: Clone
       uses: actions/checkout@v3
 
     - name: Setup Terraform with specified version on the runner
