@@ -9,9 +9,9 @@ terraform {
   }
 
   backend "s3" {
-    region   = "eu-west-2"
-    bucket   = "097614841487-tfstate"
-    key      = "docker-http-echo.tfstate"
+    region = "eu-west-2"
+    bucket = "097614841487-tfstate"
+    key    = "docker-http-echo.tfstate"
   }
 }
 
