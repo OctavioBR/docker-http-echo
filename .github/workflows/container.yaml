@@ -7,7 +7,7 @@ on:
 env:
   SHORT_SHA: $(echo ${{ github.sha }} | cut -c 1-7)
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     # if: github.ref == 'refs/heads/main'
     steps:
@@ -35,19 +35,19 @@ jobs:
 
     - name: Install and configure kubectl
       run: |
-        curl --location --remote-name https://storage.googleapis.com/kubernetes-release/release/v1.26.2/bin/linux/amd64/kubectl
+        curl --silent --location --remote-name https://storage.googleapis.com/kubernetes-release/release/v1.26.2/bin/linux/amd64/kubectl
         chmod +x kubectl
         sudo mv kubectl /usr/local/bin/
         aws eks update-kubeconfig --name green
-        kubectl --namespace=http-echo get deploy
 
-    # - name: Update deployment image
-    #   id: kubectl
-    #   uses: ianbelcher/eks-kubectl-action@master
-    #   env:
-    #     IMAGE: ${{ steps.login-ecr.outputs.registry }}/http-echo:${{ env.SHORT_SHA }}
-    #   with:
-    #     cluster_name: green
-    #     args: set image --record deployment/echo http-echo=faa1d34
-    # - name: Use the output
-    #   run: echo "${{ steps.kubectl.outputs.kubectl-out }}"
+    - uses: imranismail/setup-kustomize@v2
+
+    - name: Deploy newer container image in namespace "http-echo"
+      working-directory: ./kubernetes
+      env:
+        IMAGE: ${{ steps.login-ecr.outputs.registry }}/http-echo:${{ env.SHORT_SHA }}
+      run: |
+        kubectl create namespace http-echo --dry-run=client -o yaml | kubectl apply -f -
+        kustomize edit set image ${{ env.IMAGE }}
+        kubectl apply --kustomize .
+
