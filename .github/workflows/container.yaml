@@ -60,4 +60,5 @@ jobs:
         kubectl create namespace http-echo --dry-run=client -o yaml | kubectl apply -f -
         kustomize edit set image ${{ env.IMAGE }}
         kubectl apply --kustomize .
+        kubectl --namespace http-echo rollout status deploy/echo
 
