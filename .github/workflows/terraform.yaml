@@ -10,7 +10,6 @@ env:
   TF_LOG: INFO
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
 jobs:
   terraform:
     name: "Terraform"
@@ -19,6 +18,9 @@ jobs:
       run:
         shell: bash
         working-directory: ./terraform
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
     - name: Clone
       uses: actions/checkout@v3
@@ -39,6 +41,11 @@ jobs:
     - name: Terraform validate
       id: validate
       run: terraform validate
+
+    - name: tfsec
+      uses: aquasecurity/tfsec-pr-commenter-action@v1.2.0
+      with:
+        github_token: ${{ github.token }}
 
     - name: Terraform plan
       id: plan

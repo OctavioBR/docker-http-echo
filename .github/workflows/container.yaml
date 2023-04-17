@@ -1,12 +1,11 @@
 name: Container
 on:
-  push: &on_config
+  push:
     branches: [main]
-    paths:
-    - '**.js'
-    - '**.json'
-    - Dockerfile
-  pull_request: *on_config
+    paths: ['**.js', '**.json', Dockerfile]
+  pull_request:
+    branches: [main]
+    paths: ['**.js', '**.json', Dockerfile]
 env:
   SHORT_SHA: $(echo ${{ github.sha }} | cut -c 1-7)
 jobs:
@@ -35,6 +34,14 @@ jobs:
       run: |
         docker image build . --tag ${{ env.IMAGE }}
         docker push ${{ env.IMAGE }}
+
+    # - name: Scan Docker image
+    #   id: docker-scan
+    #   uses: alexjurkiewicz/ecr-scan-image@v1.7.1
+    #   with:
+    #     repository: ${{ steps.login-ecr.outputs.registry }}
+    #     tag: ${{ env.SHORT_SHA }}
+    #     fail_threshold: critical
 
     - name: Install and configure kubectl
       run: |
