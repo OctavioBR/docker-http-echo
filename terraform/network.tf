@@ -8,4 +8,5 @@ module "eks_vpc" {
   public_subnets     = ["10.0.3.0/24"]
   enable_nat_gateway = true
   single_nat_gateway = true
+  enable_flow_log    = true
 }
