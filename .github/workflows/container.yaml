@@ -1,15 +1,18 @@
 name: Container
 on:
-  push:
+  push: &on_config
     branches: [main]
-  pull_request:
-    branches: [main]
+    paths:
+    - '**.js'
+    - '**.json'
+    - Dockerfile
+  pull_request: *on_config
 env:
   SHORT_SHA: $(echo ${{ github.sha }} | cut -c 1-7)
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    # if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main'
     steps:
     - name: Clone
       uses: actions/checkout@v3
