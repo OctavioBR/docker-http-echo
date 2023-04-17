@@ -1,0 +1,7 @@
+---
+exclude:
+- aws-ecr-repository-customer-key
+- aws-eks-enable-control-plane-logging
+- aws-eks-encrypt-secrets
+- aws-eks-no-public-cluster-access
+- aws-eks-no-public-cluster-access-to-cidr
