@@ -41,8 +41,9 @@ $ curl localhost:8080/hello
 ```
 
 ## Provisioning infrastructure
-An AWS environment set up with CI/CD by this repo using **Github Actions**.  
-One EKS cluster is provisioned in my personal account that has a running deployment with the latest version of this image.
+An AWS environment is set up with CI/CD by this repo using **Github Actions**.  
+One EKS cluster is provisioned in my personal account that has a running deployment with the latest version of this image.  
+Every push on `main` branch triggers two pipelines that ensures all terraform and kubernetes resources are in sync with that AWS environment.
 
 It's possible to provision all the resources on your own account. You'll need to have aws-cli configured with Admin access to your account.
 There's a suggested `make infra-seed-ci-user`, which creates an user called **github** with _PowerUserAccess_ and prints it's `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`.
