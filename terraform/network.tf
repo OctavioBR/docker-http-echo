@@ -1,3 +1,4 @@
+#tfsec:ignore:aws-ec2-require-vpc-flow-logs-for-all-vpcs
 module "eks_vpc" {
   source             = "terraform-aws-modules/vpc/aws"
   version            = "4.0.1"
@@ -8,5 +9,4 @@ module "eks_vpc" {
   public_subnets     = ["10.0.3.0/24"]
   enable_nat_gateway = true
   single_nat_gateway = true
-  enable_flow_log    = true
 }

@@ -44,7 +44,7 @@ terraform/.terraform:
 	cd terraform
 	terraform init
 
-infra-up: terraform/.terraform
+infra-up: terraform/.terraform ## Provision infrastructure resources
 	cd terraform
 	terraform apply -auto-approve
 

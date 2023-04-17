@@ -1,4 +1,3 @@
-#tfsec:ignore:aws-eks-enable-control-plane-logging tfsec:ignore:aws-eks-encrypt-secrets tfsec:ignore:aws-eks-no-public-cluster-access tfsec:ignore:aws-eks-no-public-cluster-access-to-cidr
 resource "aws_eks_cluster" "green" {
   name     = "green"
   version  = "1.26"
