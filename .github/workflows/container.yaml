@@ -1,0 +1,56 @@
+name: Container
+on:
+  push: &on_config
+    branches: [main]
+    paths:
+    - '**.js'
+    - '**.json'
+    - Dockerfile
+  pull_request: *on_config
+env:
+  SHORT_SHA: $(echo ${{ github.sha }} | cut -c 1-7)
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+    - name: Clone
+      uses: actions/checkout@v3
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-region: eu-west-2
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Build and push image to ECR
+      id: build-image
+      env:
+        IMAGE: ${{ steps.login-ecr.outputs.registry }}/http-echo:${{ env.SHORT_SHA }}
+      run: |
+        docker image build . --tag ${{ env.IMAGE }}
+        docker push ${{ env.IMAGE }}
+
+    - name: Install and configure kubectl
+      run: |
+        curl --silent --location --remote-name https://storage.googleapis.com/kubernetes-release/release/v1.26.2/bin/linux/amd64/kubectl
+        chmod +x kubectl
+        sudo mv kubectl /usr/local/bin/
+        aws eks update-kubeconfig --name green
+
+    - uses: imranismail/setup-kustomize@v2
+
+    - name: Deploy newer container image in namespace "http-echo"
+      working-directory: ./kubernetes
+      env:
+        IMAGE: ${{ steps.login-ecr.outputs.registry }}/http-echo:${{ env.SHORT_SHA }}
+      run: |
+        kubectl create namespace http-echo --dry-run=client -o yaml | kubectl apply -f -
+        kustomize edit set image ${{ env.IMAGE }}
+        kubectl apply --kustomize .
+
