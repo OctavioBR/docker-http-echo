@@ -18,6 +18,9 @@ jobs:
       run:
         shell: bash
         working-directory: ./terraform
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
     - name: Clone
       uses: actions/checkout@v3
@@ -41,6 +44,8 @@ jobs:
 
     - name: tfsec
       uses: aquasecurity/tfsec-pr-commenter-action@v1.2.0
+      with:
+        github_token: ${{ github.token }}
 
     - name: Terraform plan
       id: plan
