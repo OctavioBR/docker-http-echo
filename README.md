@@ -1,3 +1,5 @@
+⚠️ Archive notice: this repo is archive in favor of https://github.com/OctavioBR/http-echo
+
 # http-echo
 This is a simple http server that echoes request data as JSON, useful for debugging.
 
